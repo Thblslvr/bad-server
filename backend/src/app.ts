@@ -17,18 +17,19 @@ const app = express()
 // Заголовки безопасности
 app.use(helmet())
 
-// Ограничение частоты запросов (DDoS / brute force защита)
+// Ограничение частоты запросов
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 минут
-    max: 100, // 100 запросов с одного IP за окно
-    standardHeaders: true,
-    legacyHeaders: false,
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
 })
 app.use(limiter)
 
 app.use(cookieParser())
 app.use(cors())
-// Безопасная раздача статики (вместо кастомного serveStatic)
+
+// Безопасная раздача статики
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(urlencoded({ extended: true }))
@@ -40,15 +41,14 @@ app.use(errors())
 app.use(errorHandler)
 
 const bootstrap = async () => {
-    try {
-        await mongoose.connect(DB_ADDRESS)
-        await app.listen(PORT, () => {
-            // eslint-disable-next-line no-console
-            console.log('ok')
-        })
-    } catch (error) {
-        console.error(error)
-    }
+  try {
+    await mongoose.connect(DB_ADDRESS)
+    await app.listen(PORT, () => {
+      // eslint-disable-next-line no-console
+      console.log('ok')
+    })
+  } catch (error) {
+    console.error(error)
+  }
 }
-
 bootstrap()

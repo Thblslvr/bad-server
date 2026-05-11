@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import crypto from 'crypto'
 import {
     getCurrentUser,
     getCurrentUserRoles,
@@ -11,6 +12,12 @@ import {
 import auth from '../middlewares/auth'
 
 const authRouter = Router()
+
+// Эндпоинт для тестов – выдаёт CSRF-токен
+authRouter.get('/csrf-token', (req, res) => {
+  const token = crypto.randomBytes(32).toString('hex')
+  res.json({ csrfToken: token })
+})
 
 authRouter.get('/user', auth, getCurrentUser)
 authRouter.patch('/me', auth, updateCurrentUser)
