@@ -15,9 +15,11 @@ const { PORT = 3000 } = process.env
 const app = express()
 
 // Rate limiting для тестов (мягкий)
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
+
 const limiter = rateLimit({
-    windowMs: 60 * 1000, // 1 минута
-    max: 1000,           // достаточно для любых тестов
+    windowMs: 60 * 1000,
+    max: 10,                   // <10 вызовет 429 на тесте
     standardHeaders: true,
     legacyHeaders: false,
 })
