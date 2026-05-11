@@ -29,6 +29,8 @@ app.use(routes)
 app.use(errors())
 app.use(errorHandler)
 
+// eslint-disable-next-line no-console
+
 const bootstrap = async () => {
     try {
         await mongoose.connect(DB_ADDRESS)
