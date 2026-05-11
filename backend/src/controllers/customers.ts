@@ -5,11 +5,7 @@ import Order from '../models/order'
 import User, { IUser } from '../models/user'
 import escapeRegExp from '../utils/escapeRegExp'
 
-export const getCustomers = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {
             page = 1,
@@ -32,10 +28,7 @@ export const getCustomers = async (
         const filters: FilterQuery<Partial<IUser>> = {}
 
         if (registrationDateFrom) {
-            filters.createdAt = {
-                ...filters.createdAt,
-                $gte: new Date(registrationDateFrom as string),
-            }
+            filters.createdAt = { ...filters.createdAt, $gte: new Date(registrationDateFrom as string) }
         }
         if (registrationDateTo) {
             const endOfDay = new Date(registrationDateTo as string)
@@ -43,10 +36,7 @@ export const getCustomers = async (
             filters.createdAt = { ...filters.createdAt, $lte: endOfDay }
         }
         if (lastOrderDateFrom) {
-            filters.lastOrderDate = {
-                ...filters.lastOrderDate,
-                $gte: new Date(lastOrderDateFrom as string),
-            }
+            filters.lastOrderDate = { ...filters.lastOrderDate, $gte: new Date(lastOrderDateFrom as string) }
         }
         if (lastOrderDateTo) {
             const endOfDay = new Date(lastOrderDateTo as string)
@@ -54,28 +44,16 @@ export const getCustomers = async (
             filters.lastOrderDate = { ...filters.lastOrderDate, $lte: endOfDay }
         }
         if (totalAmountFrom) {
-            filters.totalAmount = {
-                ...filters.totalAmount,
-                $gte: Number(totalAmountFrom),
-            }
+            filters.totalAmount = { ...filters.totalAmount, $gte: Number(totalAmountFrom) }
         }
         if (totalAmountTo) {
-            filters.totalAmount = {
-                ...filters.totalAmount,
-                $lte: Number(totalAmountTo),
-            }
+            filters.totalAmount = { ...filters.totalAmount, $lte: Number(totalAmountTo) }
         }
         if (orderCountFrom) {
-            filters.orderCount = {
-                ...filters.orderCount,
-                $gte: Number(orderCountFrom),
-            }
+            filters.orderCount = { ...filters.orderCount, $gte: Number(orderCountFrom) }
         }
         if (orderCountTo) {
-            filters.orderCount = {
-                ...filters.orderCount,
-                $lte: Number(orderCountTo),
-            }
+            filters.orderCount = { ...filters.orderCount, $lte: Number(orderCountTo) }
         }
 
         if (search && typeof search === 'string') {
@@ -133,39 +111,19 @@ export const getCustomers = async (
     }
 }
 
-export const getCustomerById = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getCustomerById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await User.findById(req.params.id).populate([
-            'orders',
-            'lastOrder',
-        ])
+        const user = await User.findById(req.params.id).populate(['orders', 'lastOrder'])
         res.status(200).json(user)
     } catch (error) {
         next(error)
     }
 }
 
-export const updateCustomer = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const updatedUser = await User.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        )
-            .orFail(
-                () =>
-                    new NotFoundError(
-                        'Пользователь по заданному id отсутствует в базе'
-                    )
-            )
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
+            .orFail(() => new NotFoundError('Пользователь по заданному id отсутствует в базе'))
             .populate(['orders', 'lastOrder'])
         res.status(200).json(updatedUser)
     } catch (error) {
@@ -173,18 +131,10 @@ export const updateCustomer = async (
     }
 }
 
-export const deleteCustomer = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const deleteCustomer = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const deletedUser = await User.findByIdAndDelete(req.params.id).orFail(
-            () =>
-                new NotFoundError(
-                    'Пользователь по заданному id отсутствует в базе'
-                )
-        )
+        const deletedUser = await User.findByIdAndDelete(req.params.id)
+            .orFail(() => new NotFoundError('Пользователь по заданному id отсутствует в базе'))
         res.status(200).json(deletedUser)
     } catch (error) {
         next(error)

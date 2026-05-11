@@ -7,11 +7,7 @@ import Product, { IProduct } from '../models/product'
 import User from '../models/user'
 import escapeRegExp from '../utils/escapeRegExp'
 
-export const getOrders = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {
             page = 1,
@@ -41,28 +37,16 @@ export const getOrders = async (
         }
 
         if (totalAmountFrom) {
-            filters.totalAmount = {
-                ...filters.totalAmount,
-                $gte: Number(totalAmountFrom),
-            }
+            filters.totalAmount = { ...filters.totalAmount, $gte: Number(totalAmountFrom) }
         }
         if (totalAmountTo) {
-            filters.totalAmount = {
-                ...filters.totalAmount,
-                $lte: Number(totalAmountTo),
-            }
+            filters.totalAmount = { ...filters.totalAmount, $lte: Number(totalAmountTo) }
         }
         if (orderDateFrom) {
-            filters.createdAt = {
-                ...filters.createdAt,
-                $gte: new Date(orderDateFrom as string),
-            }
+            filters.createdAt = { ...filters.createdAt, $gte: new Date(orderDateFrom as string) }
         }
         if (orderDateTo) {
-            filters.createdAt = {
-                ...filters.createdAt,
-                $lte: new Date(orderDateTo as string),
-            }
+            filters.createdAt = { ...filters.createdAt, $lte: new Date(orderDateTo as string) }
         }
 
         const aggregatePipeline: any[] = [
@@ -93,7 +77,7 @@ export const getOrders = async (
             const searchNumber = Number(search)
 
             const searchConditions: any[] = [{ 'products.title': searchRegex }]
-            if (!Number.isNaN(searchNumber)) {
+            if (!isNaN(searchNumber)) {
                 searchConditions.push({ orderNumber: searchNumber })
             }
 
@@ -142,11 +126,7 @@ export const getOrders = async (
     }
 }
 
-export const getOrdersCurrentUser = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getOrdersCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = res.locals.user._id
         const { search, page = 1, limit = 5 } = req.query
@@ -159,14 +139,12 @@ export const getOrdersCurrentUser = async (
         const user = await User.findById(userId)
             .populate({
                 path: 'orders',
-                populate: [{ path: 'products' }, { path: 'customer' }],
+                populate: [
+                    { path: 'products' },
+                    { path: 'customer' },
+                ],
             })
-            .orFail(
-                () =>
-                    new NotFoundError(
-                        'Пользователь по заданному id отсутствует в базе'
-                    )
-            )
+            .orFail(() => new NotFoundError('Пользователь по заданному id отсутствует в базе'))
 
         let orders = user.orders as unknown as IOrder[]
 
@@ -181,9 +159,7 @@ export const getOrdersCurrentUser = async (
                 const matchesProductTitle = order.products.some((product) =>
                     productIds.some((id) => id.equals(product._id))
                 )
-                const matchesOrderNumber =
-                    !Number.isNaN(searchNumber) &&
-                    order.orderNumber === searchNumber
+                const matchesOrderNumber = !isNaN(searchNumber) && order.orderNumber === searchNumber
                 return matchesOrderNumber || matchesProductTitle
             })
         }
@@ -206,22 +182,11 @@ export const getOrdersCurrentUser = async (
     }
 }
 
-export const getOrderByNumber = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getOrderByNumber = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const order = await Order.findOne({
-            orderNumber: req.params.orderNumber,
-        })
+        const order = await Order.findOne({ orderNumber: req.params.orderNumber })
             .populate(['customer', 'products'])
-            .orFail(
-                () =>
-                    new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
-            )
+            .orFail(() => new NotFoundError('Заказ по заданному id отсутствует в базе'))
         return res.status(200).json(order)
     } catch (error) {
         if (error instanceof MongooseError.CastError) {
@@ -231,27 +196,14 @@ export const getOrderByNumber = async (
     }
 }
 
-export const getOrderCurrentUserByNumber = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getOrderCurrentUserByNumber = async (req: Request, res: Response, next: NextFunction) => {
     const userId = res.locals.user._id
     try {
-        const order = await Order.findOne({
-            orderNumber: req.params.orderNumber,
-        })
+        const order = await Order.findOne({ orderNumber: req.params.orderNumber })
             .populate(['customer', 'products'])
-            .orFail(
-                () =>
-                    new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
-            )
+            .orFail(() => new NotFoundError('Заказ по заданному id отсутствует в базе'))
         if (!order.customer._id.equals(userId)) {
-            return next(
-                new NotFoundError('Заказ по заданному id отсутствует в базе')
-            )
+            return next(new NotFoundError('Заказ по заданному id отсутствует в базе'))
         }
         return res.status(200).json(order)
     } catch (error) {
@@ -262,17 +214,12 @@ export const getOrderCurrentUserByNumber = async (
     }
 }
 
-export const createOrder = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const basket: IProduct[] = []
         const products = await Product.find<IProduct>({})
         const userId = res.locals.user._id
-        const { address, payment, phone, total, email, items, comment } =
-            req.body
+        const { address, payment, phone, total, email, items, comment } = req.body
 
         items.forEach((id: Types.ObjectId) => {
             const product = products.find((p) => p._id.equals(id))
@@ -290,9 +237,7 @@ export const createOrder = async (
         }
 
         // Санитизация комментария (экранирование HTML)
-        const sanitizedComment = comment
-            ? String(comment).replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            : ''
+        const sanitizedComment = comment ? String(comment).replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''
 
         const newOrder = new Order({
             totalAmount: total,
@@ -316,11 +261,7 @@ export const createOrder = async (
     }
 }
 
-export const updateOrder = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const updateOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { status } = req.body
         const updatedOrder = await Order.findOneAndUpdate(
@@ -328,12 +269,7 @@ export const updateOrder = async (
             { status },
             { new: true, runValidators: true }
         )
-            .orFail(
-                () =>
-                    new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
-            )
+            .orFail(() => new NotFoundError('Заказ по заданному id отсутствует в базе'))
             .populate(['customer', 'products'])
         return res.status(200).json(updatedOrder)
     } catch (error) {
@@ -347,19 +283,10 @@ export const updateOrder = async (
     }
 }
 
-export const deleteOrder = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const deletedOrder = await Order.findByIdAndDelete(req.params.id)
-            .orFail(
-                () =>
-                    new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
-            )
+            .orFail(() => new NotFoundError('Заказ по заданному id отсутствует в базе'))
             .populate(['customer', 'products'])
         return res.status(200).json(deletedOrder)
     } catch (error) {
