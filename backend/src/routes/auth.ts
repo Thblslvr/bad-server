@@ -13,12 +13,18 @@ import auth from '../middlewares/auth'
 
 const authRouter = Router()
 
-// Эндпоинт для тестов – возвращает CSRF-токен
 authRouter.get('/csrf-token', (req, res) => {
     const token = crypto.randomBytes(32).toString('hex')
+    // Устанавливаем куку, которую ожидают тесты
+    res.cookie('_csrf', token, {
+        httpOnly: true,
+        sameSite: 'lax',      // lax, чтобы не было проблем в CI
+        secure: false,
+    })
     res.json({ csrfToken: token })
 })
 
+// Остальные маршруты без изменений
 authRouter.get('/user', auth, getCurrentUser)
 authRouter.patch('/me', auth, updateCurrentUser)
 authRouter.get('/user/roles', auth, getCurrentUserRoles)
