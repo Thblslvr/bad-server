@@ -2,7 +2,16 @@ import { existsSync, mkdirSync, rename } from 'fs'
 import { basename, join } from 'path'
 
 function movingFile(imagePath: string, from: string, to: string) {
-    const fileName = basename(imagePath)
+    const fileName = basename(imagePath) // автоматически удаляет всё до последнего слэша
+    // Дополнительно можно проверить, что fileName не содержит недопустимых символов
+    if (
+        fileName.includes('..') ||
+        fileName.includes('/') ||
+        fileName.includes('\\')
+    ) {
+        throw new Error('Недопустимое имя файла')
+    }
+
     const imagePathTemp = join(from, fileName)
     const imagePathPermanent = join(to, fileName)
 
