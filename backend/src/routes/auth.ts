@@ -13,10 +13,9 @@ import auth from '../middlewares/auth'
 
 const authRouter = Router()
 
-// Эндпоинт для тестов – выдаёт CSRF-токен
 authRouter.get('/csrf-token', (req, res) => {
-  const token = crypto.randomBytes(32).toString('hex')
-  res.json({ csrfToken: token })
+    const token = crypto.randomBytes(32).toString('hex')
+    res.json({ csrfToken: token })
 })
 
 authRouter.get('/user', auth, getCurrentUser)

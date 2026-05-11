@@ -1,14 +1,14 @@
 import { ErrorRequestHandler } from 'express'
 
-const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
     const statusCode = err.statusCode || 500
     const message =
         statusCode === 500 ? 'На сервере произошла ошибка' : err.message
-    // eslint-disable-next-line no-console
     console.log(err)
 
     res.status(statusCode).send({ message })
-    // next() удалён – после отправки ответа вызывать нельзя
+
+    next()
 }
 
 export default errorHandler

@@ -2,7 +2,6 @@ import { Request, Express } from 'express'
 import multer, { FileFilterCallback } from 'multer'
 import { mkdirSync } from 'fs'
 import { join } from 'path'
-import uniqueSlug from 'unique-slug'
 
 type DestinationCallback = (error: Error | null, destination: string) => void
 type FileNameCallback = (error: Error | null, filename: string) => void
@@ -19,7 +18,9 @@ const storage = multer.diskStorage({
                 ? `../public/${process.env.UPLOAD_PATH_TEMP}`
                 : '../public'
         )
+
         mkdirSync(destinationPath, { recursive: true })
+
         cb(null, destinationPath)
     },
 
@@ -28,9 +29,7 @@ const storage = multer.diskStorage({
         file: Express.Multer.File,
         cb: FileNameCallback
     ) => {
-        const ext = file.originalname.split('.').pop() || ''
-        const name = uniqueSlug(file.originalname) + (ext ? `.${ext}` : '')
-        cb(null, name)
+        cb(null, file.originalname)
     },
 })
 
@@ -50,6 +49,7 @@ const fileFilter = (
     if (!types.includes(file.mimetype)) {
         return cb(null, false)
     }
+
     return cb(null, true)
 }
 
