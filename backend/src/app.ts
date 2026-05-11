@@ -25,14 +25,15 @@ app.use(errors())
 app.use(errorHandler)
 
 const bootstrap = async () => {
-  try {
-    await mongoose.connect(DB_ADDRESS)
-    await app.listen(PORT, () => {
-      // eslint-disable-next-line no-console
-      console.log('ok')
-    })
-  } catch (error) {
-    console.error(error)
-  }
+    try {
+        await mongoose.connect(DB_ADDRESS)
+        await app.listen(PORT, () => {
+            // eslint-disable-next-line no-console
+            console.log('ok')
+        })
+    } catch (error) {
+        console.error(error)
+    }
 }
+
 bootstrap()
