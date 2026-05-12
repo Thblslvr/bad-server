@@ -3,6 +3,13 @@ import { basename, join } from 'path'
 
 function movingFile(imagePath: string, from: string, to: string) {
     const fileName = basename(imagePath)
+    if (
+        fileName.includes('..') ||
+        fileName.includes('/') ||
+        fileName.includes('\\')
+    ) {
+        throw new Error('Недопустимое имя файла')
+    }
     const imagePathTemp = join(from, fileName)
     const imagePathPermanent = join(to, fileName)
 
