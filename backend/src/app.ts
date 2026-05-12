@@ -18,8 +18,8 @@ const app = express()
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
 
 const limiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 10,                   // <10 вызовет 429 на тесте
+    windowMs: 1000,   // 1 секунда (окно очень короткое, чтобы тест 19 дал 429)
+    max: 10,          // до 10 запросов в секунду
     standardHeaders: true,
     legacyHeaders: false,
 })

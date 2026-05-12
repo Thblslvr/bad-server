@@ -3,23 +3,20 @@ import { constants } from 'http2'
 import BadRequestError from '../errors/bad-request-error'
 import fs from 'fs'
 import sharp from 'sharp'
-import path from 'path'
 
 export const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.file) {
         return next(new BadRequestError('Файл не загружен'))
     }
-    // Минимальный размер 2 КБ (2048 байт)
+    // Проверка минимального размера 2 КБ
     if (req.file.size < 2048) {
         fs.unlink(req.file.path, () => {})
         return next(new BadRequestError('Размер файла должен быть больше 2 КБ'))
     }
     try {
-        // Очистка метаданных через sharp
+        // Удаление метаданных
         const outputPath = req.file.path + '.clean'
-        await sharp(req.file.path)
-            .rotate()
-            .toFile(outputPath)
+        await sharp(req.file.path).rotate().toFile(outputPath)
         fs.unlinkSync(req.file.path)
         fs.renameSync(outputPath, req.file.path)
 
