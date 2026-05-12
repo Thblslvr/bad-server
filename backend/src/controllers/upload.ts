@@ -1,21 +1,23 @@
+import fs from 'fs'
 import { NextFunction, Request, Response } from 'express'
 import { constants } from 'http2'
-import BadRequestError from '../errors/bad-request-error'
-import fs from 'fs'
 import sharp from 'sharp'
+import BadRequestError from '../errors/bad-request-error'
 
-export const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
+export const uploadFile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     if (!req.file) {
         return next(new BadRequestError('Файл не загружен'))
     }
-    // Проверка минимального размера 2 КБ
     if (req.file.size < 2048) {
         fs.unlink(req.file.path, () => {})
         return next(new BadRequestError('Размер файла должен быть больше 2 КБ'))
     }
     try {
-        // Удаление метаданных
-        const outputPath = req.file.path + '.clean'
+        const outputPath = `${req.file.path}.clean`
         await sharp(req.file.path).rotate().toFile(outputPath)
         fs.unlinkSync(req.file.path)
         fs.renameSync(outputPath, req.file.path)

@@ -13,7 +13,7 @@ import auth from '../middlewares/auth'
 
 const authRouter = Router()
 
-authRouter.get('/csrf-token', (req, res) => {
+authRouter.get('/csrf-token', (_req, res) => {
     const token = crypto.randomBytes(32).toString('hex')
     res.cookie('_csrf', token, {
         httpOnly: true,

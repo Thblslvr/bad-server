@@ -18,8 +18,8 @@ const app = express()
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
 
 const limiter = rateLimit({
-    windowMs: 1000,   // 1 секунда (окно очень короткое, чтобы тест 19 дал 429)
-    max: 10,          // до 10 запросов в секунду
+    windowMs: 1000, // 1 секунда (окно очень короткое, чтобы тест 19 дал 429)
+    max: 10, // до 10 запросов в секунду
     standardHeaders: true,
     legacyHeaders: false,
 })
@@ -39,7 +39,7 @@ app.use(errorHandler)
 const bootstrap = async () => {
     try {
         await mongoose.connect(DB_ADDRESS)
-        await seedDatabase()         // заполнение базы, если пустая
+        await seedDatabase() // заполнение базы, если пустая
         await app.listen(PORT, () => {
             console.log('ok')
         })
